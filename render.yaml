@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: lion-shop-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: POSTGRES_POOL_SIZE
+        value: "5"
+      # Set all of these manually in the Render dashboard after first deploy
+      - key: DATABASE_URL
+        sync: false
+      - key: PRIVATE_KEY
+        sync: false
+      - key: PUBLIC_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
