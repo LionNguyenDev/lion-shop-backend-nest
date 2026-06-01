@@ -31,8 +31,9 @@ async function bootstrap() {
       }),
     );
 
-    // Swagger - only enable in non-production environments
-    if (configService.get('env') !== 'production') {
+    // Swagger
+    const swaggerEnabled = configService.get('SWAGGER_ENABLED', 'true') !== 'false';
+    if (swaggerEnabled) {
       const config = new DocumentBuilder()
         .setTitle('Prime Nestjs')
         .setDescription('Boilerplate for nestjs')
