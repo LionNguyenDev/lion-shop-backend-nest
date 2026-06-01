@@ -11,6 +11,14 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderItemDto } from './dto/order-item.dto';
 
+interface ResolvedItem {
+  productId: number;
+  productName: string;
+  quantity: number;
+  price: number;
+  originalPrice: number;
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -19,40 +27,69 @@ export class OrdersService {
     private readonly customersService: CustomersService,
   ) {}
 
-  private computeTotals(items: OrderItemDto[]): { totalAmount: number; profit: number } {
+  private computeTotals(items: ResolvedItem[]): { totalAmount: number; profit: number } {
     const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const profit = items.reduce((sum, item) => sum + (item.price - item.originalPrice) * item.quantity, 0);
     return { totalAmount, profit };
   }
 
-  private async decrementStock(manager: EntityManager, items: OrderItemDto[], warehouse: Warehouse): Promise<void> {
-    const stockColumn = WAREHOUSE_STOCK_COLUMN[warehouse];
+  private async resolveItemsAndDecrementStock(manager: EntityManager, items: OrderItemDto[], warehouse: Warehouse): Promise<ResolvedItem[]> {
     const productRepo = manager.getRepository(Product);
+    const stockColumn = WAREHOUSE_STOCK_COLUMN[warehouse];
+    const resolved: ResolvedItem[] = [];
 
     for (const item of items) {
-      if (!item.productId) continue;
       const product = await productRepo.findOne({ where: { id: item.productId } });
-      if (!product) continue;
+      if (!product) throw new NotFoundException(`Sản phẩm ID ${item.productId} không tồn tại`);
 
       if (product[stockColumn] < item.quantity) {
-        throw new BadRequestException(`Tồn kho ${warehouse} không đủ cho sản phẩm "${item.productName}"`);
+        throw new BadRequestException(`Tồn kho ${warehouse} không đủ cho sản phẩm "${product.name}"`);
       }
       product[stockColumn] -= item.quantity;
       await productRepo.save(product);
+
+      resolved.push({
+        productId: item.productId,
+        productName: product.name,
+        quantity: item.quantity,
+        price: product.sellingPrice,
+        originalPrice: product.originalPrice,
+      });
     }
+
+    return resolved;
+  }
+
+  private async resolveItems(manager: EntityManager, items: OrderItemDto[]): Promise<ResolvedItem[]> {
+    const productRepo = manager.getRepository(Product);
+    const resolved: ResolvedItem[] = [];
+
+    for (const item of items) {
+      const product = await productRepo.findOne({ where: { id: item.productId } });
+      if (!product) throw new NotFoundException(`Sản phẩm ID ${item.productId} không tồn tại`);
+
+      resolved.push({
+        productId: item.productId,
+        productName: product.name,
+        quantity: item.quantity,
+        price: product.sellingPrice,
+        originalPrice: product.originalPrice,
+      });
+    }
+
+    return resolved;
   }
 
   async create(dto: CreateOrderDto): Promise<Order> {
     return this.ordersRepository.manager.transaction(async (manager) => {
-      const { totalAmount, profit } = this.computeTotals(dto.items);
+      const resolvedItems = await this.resolveItemsAndDecrementStock(manager, dto.items, dto.warehouse);
+      const { totalAmount, profit } = this.computeTotals(resolvedItems);
 
       const customer = await this.customersService.upsertForOrder(manager, {
         name: dto.customerName,
         phone: dto.phone,
         address: dto.address,
       });
-
-      await this.decrementStock(manager, dto.items, dto.warehouse);
 
       const orderRepo = manager.getRepository(Order);
       const order = orderRepo.create({
@@ -64,9 +101,9 @@ export class OrdersService {
         warehouse: dto.warehouse,
         totalAmount,
         profit,
-        items: dto.items.map((item) =>
+        items: resolvedItems.map((item) =>
           manager.getRepository(OrderItem).create({
-            productId: item.productId ?? null,
+            productId: item.productId,
             productName: item.productName,
             quantity: item.quantity,
             price: item.price,
@@ -106,13 +143,14 @@ export class OrdersService {
       if (dto.warehouse !== undefined) order.warehouse = dto.warehouse;
 
       if (dto.items) {
+        const resolvedItems = await this.resolveItems(manager, dto.items);
         await manager.getRepository(OrderItem).delete({ orderId: id });
-        const { totalAmount, profit } = this.computeTotals(dto.items);
+        const { totalAmount, profit } = this.computeTotals(resolvedItems);
         order.totalAmount = totalAmount;
         order.profit = profit;
-        order.items = dto.items.map((item) =>
+        order.items = resolvedItems.map((item) =>
           manager.getRepository(OrderItem).create({
-            productId: item.productId ?? null,
+            productId: item.productId,
             productName: item.productName,
             quantity: item.quantity,
             price: item.price,

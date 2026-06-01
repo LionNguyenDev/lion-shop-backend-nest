@@ -1,11 +1,10 @@
 {
-  "name": "prime-nestjs",
+  "name": "lion-shop",
   "version": "2.1.0",
-  "description": "A production-ready NestJS boilerplate with authentication, TypeORM, Swagger and more.",
+  "description": "A NestJS application for Lion Shop, an e-commerce platform.",
   "author": {
-    "name": "Joseph Goksu",
-    "email": "josephgoksu@gmail.com",
-    "url": "https://josephgoksu.com"
+    "name": "Nguyen Danh Luu",
+    "email": "luund206@gmail.com"
   },
   "private": false,
   "license": "MIT",
