@@ -4,7 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
+import 'reflect-metadata';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
@@ -35,8 +35,8 @@ async function bootstrap() {
     const swaggerEnabled = configService.get('SWAGGER_ENABLED', 'true') !== 'false';
     if (swaggerEnabled) {
       const config = new DocumentBuilder()
-        .setTitle('Prime Nestjs')
-        .setDescription('Boilerplate for nestjs')
+        .setTitle('Lion Shop API')
+        .setDescription('API documentation for Lion Shop backend')
         .setVersion('2.0.0')
         .addBearerAuth()
         .addTag('api')

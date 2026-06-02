@@ -13,17 +13,17 @@ export class CreateOrderDto {
   @Type(() => OrderItemDto)
   items: OrderItemDto[];
 
-  @ApiProperty({ example: 'Nguyễn Khánh Linh' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ example: 'Nguyễn Khánh Linh' })
+  @IsOptional()
   @IsString()
   @MaxLength(255)
-  customerName: string;
+  customerName?: string;
 
-  @ApiProperty({ example: '0901234567' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ example: '0901234567' })
+  @IsOptional()
   @IsString()
   @MaxLength(20)
-  phone: string;
+  phone?: string;
 
   @ApiPropertyOptional({ example: '123 Nguyễn Trãi, Q.1, TP.HCM' })
   @IsOptional()

@@ -85,17 +85,23 @@ export class OrdersService {
       const resolvedItems = await this.resolveItemsAndDecrementStock(manager, dto.items, dto.warehouse);
       const { totalAmount, profit } = this.computeTotals(resolvedItems);
 
-      const customer = await this.customersService.upsertForOrder(manager, {
-        name: dto.customerName,
-        phone: dto.phone,
-        address: dto.address,
-      });
+      const customerName = dto.customerName || 'Khách lẻ';
+      let customerId: number | null = null;
+
+      if (dto.phone) {
+        const customer = await this.customersService.upsertForOrder(manager, {
+          name: customerName,
+          phone: dto.phone,
+          address: dto.address,
+        });
+        customerId = customer.id;
+      }
 
       const orderRepo = manager.getRepository(Order);
       const order = orderRepo.create({
-        customerId: customer.id,
-        customerName: dto.customerName,
-        phone: dto.phone,
+        customerId,
+        customerName,
+        phone: dto.phone ?? '',
         address: dto.address ?? '',
         status: dto.status ?? OrderStatus.UNPAID,
         warehouse: dto.warehouse,

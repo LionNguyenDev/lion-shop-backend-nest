@@ -23,7 +23,7 @@ export class Order {
   @Column()
   customerName: string;
 
-  @Column({ length: 20 })
+  @Column({ length: 20, default: '' })
   phone: string;
 
   @Column({ type: 'text', default: '' })

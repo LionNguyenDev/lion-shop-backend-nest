@@ -1,6 +1,6 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
-
+import 'reflect-metadata';
 dotenv.config();
 
 const sharedOptions = {
