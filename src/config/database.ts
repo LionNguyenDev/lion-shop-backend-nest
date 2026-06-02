@@ -25,10 +25,7 @@ export const dataSourceOptions: DataSourceOptions = connectionUrl
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      ssl:
-        process.env.POSTGRES_SSL === 'true'
-          ? { rejectUnauthorized: process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED !== 'false' }
-          : false,
+      ssl: process.env.POSTGRES_SSL === 'true' ? { rejectUnauthorized: process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED !== 'false' } : false,
       ...sharedOptions,
     };
 

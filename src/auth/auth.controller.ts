@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Redirect, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDTO } from './dto/login.dto';
@@ -31,8 +31,10 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
+  @Redirect()
   googleCallback(@Req() req: { user: User }) {
-    return this.authService.googleLogin(req.user);
+    const { access_token } = this.authService.googleLogin(req.user);
+    return { url: `lionshop://auth/callback?access_token=${access_token}` };
   }
 
   @Get('me')
