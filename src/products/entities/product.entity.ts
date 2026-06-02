@@ -31,8 +31,8 @@ export class Product {
   @Column({ type: 'int', default: 0 })
   stockSG: number;
 
-  @Column({ type: 'text' })
-  imageUrl: string;
+  @Column({ type: 'text', nullable: true })
+  imageUrl: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

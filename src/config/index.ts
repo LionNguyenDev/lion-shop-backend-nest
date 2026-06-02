@@ -14,6 +14,7 @@ interface iConfig {
     clientId: string;
     clientSecret: string;
     callbackUrl: string;
+    webCallbackUrl: string;
   };
 }
 
@@ -38,5 +39,6 @@ export default (): Partial<iConfig> => ({
     clientId: requireEnv('GOOGLE_CLIENT_ID'),
     clientSecret: requireEnv('GOOGLE_CLIENT_SECRET'),
     callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback',
+    webCallbackUrl: process.env.GOOGLE_WEB_CALLBACK_URL || 'http://localhost:3000/auth/google/web/callback',
   },
 });

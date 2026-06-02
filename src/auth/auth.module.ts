@@ -6,6 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { GoogleStrategy } from './strategy/google.strategy';
+import { GoogleWebStrategy } from './strategy/google-web.strategy';
 import { AuthController } from './auth.controller';
 import { LoggerModule } from 'src/logger/logger.module';
 
@@ -24,7 +25,7 @@ import { LoggerModule } from 'src/logger/logger.module';
     }),
     UsersModule,
   ],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, GoogleWebStrategy],
   exports: [AuthService, JwtModule, PassportModule],
   controllers: [AuthController],
 })

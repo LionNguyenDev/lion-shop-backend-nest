@@ -48,8 +48,8 @@ export class CreateProductDto {
   @Min(0)
   stockSG?: number;
 
-  @ApiProperty({ example: 'https://cdn.example.com/image.jpg' })
-  @IsNotEmpty()
+  @ApiProperty({ example: 'https://cdn.example.com/image.jpg', required: false })
+  @IsOptional()
   @IsString()
-  imageUrl: string;
+  imageUrl?: string;
 }
